@@ -5,12 +5,8 @@
 #include <tuple>
 #include <list>
 #include <iostream>
-
-auto option_help = [] () -> int {
-  using namespace std;
-  cout << "Displaying help and shit.\n\n";
-  return 0;
-};
+#include <vector>
+#include <getopt.h>
 
 using action_t    = std::function<int(void)>;
 using option_t    = std::tuple<char, const char*, const char*, bool, action_t>;

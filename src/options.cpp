@@ -4,14 +4,36 @@
 #include <getopt.h>
 #include <vector>
 
-auto option_parser(const option_list& opts) -> parser_t {
+
+auto make_option(char shortopt, const char* longopt, const char* helptxt,
+  bool has_arg, action_t action) -> option_t 
+{
+  return std::make_tuple(shortopt, longopt, helptxt, has_arg, action);
+}
+
+auto option_parser(const option_list& opts) -> parser_t 
+{
+
   return [&] (int argc, char* argv[]) -> int {
     using namespace std;
+    option_list opt_list(opts.begin(), opts.end());
+    list<option_t> l(opt_list.begin(), opt_list.end());
+    static auto option_help = [&] () -> int {
+      for(auto& i : opt_list) {
+        cout << "-"  << get<0>(i) << "\t\t"
+             << "--" << get<1>(i) << "\t\t"
+             << get<2>(i) << "\n";
+      }
+      return 0;
+    };
+    static auto builtin_help_opt = make_option('h', "help", 
+        "Display this help information.", false, option_help);
+    opt_list.push_back(builtin_help_opt);
     // string containing the short opts to pass to getopt_long
     string short_opt_string;
     // create the array of options to pass to getopt_long
     std::vector<struct option> opt_array;
-    for(auto& i : opts) {
+    for(const auto& i : opt_list) {
       auto& shortopt = get<0>(i);
       auto& longopt  = get<1>(i);
       auto& helptxt  = get<2>(i);
@@ -41,7 +63,7 @@ auto option_parser(const option_list& opts) -> parser_t {
     while(opt_match != -1) {
       opt_match = getopt_long(argc, argv, short_opt_string.c_str(), 
         opt_array.data(), &opt_index);
-      for(auto& i : opts) {
+      for(auto& i : opt_list) {
         auto sopt = get<0>(i);
         if(sopt == opt_match) {
           auto action = get<4>(i);
@@ -55,11 +77,4 @@ auto option_parser(const option_list& opts) -> parser_t {
     return 0;
   };
 };
-
-auto make_option(char shortopt, const char* longopt, const char* helptxt,
-  bool has_arg, action_t action) -> option_t 
-{
-  return std::make_tuple(shortopt, longopt, helptxt, has_arg, action);
-}
-
 
