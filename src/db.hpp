@@ -15,14 +15,10 @@ namespace db {
   using record_t        = std::pair<string_t, string_t>;
   using map_t           = std::map<string_t, string_t>;
 
-  auto get_cwd() -> string_t;
 
-  auto get_record(const char* buffer, const size_t size) -> record_t;
-  auto get_record(const string_t& str) -> record_t;
-
-  auto init_defaults() -> map_t;
-
-  auto open_db() -> bool;
+  auto record_from_string(size_t, const char*)        -> record_t;
+  auto record_from_string(const string_t&)            -> record_t;
+  auto string_from_record(const record_t&)              -> string_t;
 
 }; // namespace db
 //============================================================================

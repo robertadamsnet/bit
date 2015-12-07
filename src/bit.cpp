@@ -12,8 +12,17 @@ int main()
        << "In the meantime, here is some test crap: " << endl;
       
 
-  auto p = db::get_record("test:bunch of bullshit");
+  db::string_t source = "test\\:delim:bunch of bullshit";
+  cout << "Source:\n" << source << "\n";
 
-  cout << get<0>(p) << " == " << get<1>(p) << endl;
+
+  auto record = db::record_from_string(source);
+  cout << "Key = \""    << record.first  << "\" "
+       << "Value = \""  << record.second << "\"\n";
+
+  auto line = db::string_from_record(record);
+
+  cout << "Converted back to string:\n"
+       << line << "\n";
   return 0;
 }

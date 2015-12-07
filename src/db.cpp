@@ -1,76 +1,76 @@
 #include "db.hpp"
 
-#include <unistd.h>
-#include <stdlib.h>
+#include <functional>
 
 namespace db {
 //============================================================================
 //
-auto get_cwd() -> string_t {
-  auto cwd_cstr = get_current_dir_name();
-  string_t cwd(cwd_cstr);
-  free(cwd_cstr);
-  return cwd;
-};
-
+  auto record_from_string(const string_t& s) -> record_t {
+    return record_from_string(s.size(), s.c_str());
+  }
 //============================================================================
 //
-auto init_defaults() -> map_t {
-  map_t map;
-  
-  string_t cwd = get_cwd();
+  auto record_from_string(size_t len, const char* cstr) -> record_t {
+    size_t idx = 0;
+    string_t key;
 
-  map["BIT_ROOT"]                 = cwd + "/.bit";
-  map["BIT_DB_NAME"]              = map["BIT_ROOT"] + "/db.csv";
+    auto getch =[&] {
+      return idx < len ? cstr[idx++] : 0;
+    };
 
-  return map;
-};
-
-//============================================================================
-//
-auto open_db() -> std::FILE* {
-  auto handle = fopen(   
-};
-
-//============================================================================
-//
-
-auto get_record(const char* buffer, const size_t size) -> record_t {
-  size_t index = 0;
-  
-  auto getch = [&] {
-    return index < size ? buffer[index++] : 0;
-  };
-
-  auto find_delim = [&] {
-    while(index < size) {
-      switch(getch()) {
-      case 0:
+    std::function<void(void)> process_key = [&] {
+      auto ch = getch();
+      switch(ch) {
+      // terminate on delimiter or null
+      case  0:
       case ':':
-        return index;
+        return;
+      // process extra char when escaped with '\'
       case '\\':
-        getch();
-      }
-    }
-    return index;
-  };
+        ch = getch();
+        break;
+      };
+      key.append(1, ch);
+      // recurse
+      process_key();
+    };
 
-  auto delim          = find_delim();
-  auto key_end        = delim > 0    ? delim - 1 : 0;
-  auto value_begin    = delim < size ? delim     : size;
+    process_key();
 
-  string_t key(buffer, key_end);
-  string_t value(buffer + value_begin);
-
-  return make_pair(key, value);
-};
-
+    auto value_start  = idx < len ? idx     : len;
+    
+    return record_t(key, string_t(cstr + value_start));
+  }
 //============================================================================
 //
+  auto string_from_record(const record_t& record) -> string_t {
 
-auto get_record(const string_t& str) -> record_t {
-  return get_record(str.c_str(), str.size());
-}
+    auto process_key = [] (const string_t& key) {     
+      string_t line;
+      const auto len = key.size();
+      auto idx = len * 0;
+      auto getch = [&] {
+        return idx < len ? key[idx++] : 0;
+      };
+
+      std::function<string_t(void)> recurse = [&] {
+        auto ch = getch();
+        switch(ch) {
+        case 0:
+          return line;
+        case ':':
+        case '\\':
+          line += '\\';      
+        };
+        line += ch;
+        return recurse();
+      };
+
+      return recurse();
+    };
+
+    return process_key(record.first) + ":" + record.second;
+  };
 
 //============================================================================
 } // namespace db
