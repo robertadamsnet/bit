@@ -11,7 +11,6 @@ namespace record {
 
   using string_t        = std::string;
   using record_t        = std::pair<string_t, string_t>;
-  using map_t           = std::map<string_t, string_t>;
 
 
   auto from_string(size_t, const char*)        -> record_t;
