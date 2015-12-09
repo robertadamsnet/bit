@@ -1,7 +1,6 @@
 #include "bit.hpp"
 #include "option.hpp"
 #include "db.hpp"
-#include "record.hpp"
 #include <iostream>
 
 
@@ -9,7 +8,7 @@ int main(int argc, char* argv[])
 {
   using namespace std;
   using db::map_t;
-  using record::record_t;
+  using db::record_t;
 
   map_t test1 = {
     record_t("name", "Robert"),
@@ -40,8 +39,6 @@ int main(int argc, char* argv[])
     ++record;
     ++new_record;
   };
-
-  options::merge(argc, argv);
 
   return 0;
 }

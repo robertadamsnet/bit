@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.12)
 
-set(bit-common option.cpp db.cpp record.cpp)
+set(bit-common option.cpp db.cpp)
 
 add_executable(bit        ${bit-common}  bit.cpp)
 add_executable(bit-test   ${bit-common}  bit-test.cpp)

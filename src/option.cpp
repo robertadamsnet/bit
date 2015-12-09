@@ -1,24 +1,19 @@
-#include "options.hpp"
+#include "option.hpp"
+
+
 
 #include <iostream>
 #include <getopt.h>
 #include <vector>
 
-namespace option {
+namespace opt {
 //============================================================================
 //
-auto make(char shortopt, const char* longopt, const char* helptxt,
-  Argument has_arg, action_t action) -> option_t 
-{
-  return std::make_tuple(shortopt, longopt, helptxt, has_arg, action);
-}
-//============================================================================
-//
-auto parse(const option_list& opts, const action_t& non_arg, int argc, 
+auto parse(const option_list_t& opts, const action_t& non_arg, int argc, 
     char* argv[]) -> int 
 {
   using namespace std;
-  option_list opt_list(opts.begin(), opts.end());
+  option_list_t opt_list(opts.begin(), opts.end());
   list<option_t> l(opt_list.begin(), opt_list.end());
   static auto option_help = [&] (const string_t&) -> int {
     for(auto& i : opt_list) {
@@ -31,8 +26,8 @@ auto parse(const option_list& opts, const action_t& non_arg, int argc,
     }
     return 0;
   };
-  static auto builtin_help_opt = make('h', "help", 
-      "Display this help information.", Argument::not_required, option_help);
+  static auto builtin_help_opt = option_t('h', "help", 
+      "Display this help information.", arg_none, option_help);
   opt_list.push_back(builtin_help_opt);
   // string containing the short opts to pass to getopt_long
   string_t short_opt_string;
@@ -48,14 +43,14 @@ auto parse(const option_list& opts, const action_t& non_arg, int argc,
     // insert the entry into the long option array
     struct option o = { 
       longopt, 
-      has_arg == Argument::required ? required_argument : no_argument,
+      has_arg == arg_required ? required_argument : no_argument,
       0,
       shortopt
     };
     opt_array.push_back(o);
     // add an entry to the short option string
     short_opt_string += shortopt;
-    if(has_arg == Argument::required) {
+    if(has_arg == arg_required) {
       short_opt_string += ":";
     }
   } 
@@ -90,4 +85,4 @@ auto parse(const option_list& opts, const action_t& non_arg, int argc,
 };
 //============================================================================
 //
-}; // namespace option
+}; // namespace opt
