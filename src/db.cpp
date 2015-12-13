@@ -7,7 +7,6 @@
  *
  */
 #include "db.hpp"
-#include "db_keys.hpp"
 #include <fstream>
 #include <functional>
 namespace db {
@@ -19,7 +18,7 @@ namespace db {
       record_t(key_bit_cpp_flags(), "std=c++14"),
       record_t(key_bit_dirs_link(), ""),
       record_t(key_bit_dirs_include(), ""),
-      record_t(key_project_dirs_build(), "build"),
+      record_t(key_project_dirs_output(), "build"),
       record_t(key_bit_version(), "0:1")
     };
   };

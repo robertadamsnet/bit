@@ -47,6 +47,7 @@ auto do_init = []() {
 
 int main (int argc, char* argv[]) 
 {
+
   auto opts = opt::make_list(
     opt::make('R', "reset", "Clear database entries and re-initialize keys.", 
       opt::arg_none, do_reset)
