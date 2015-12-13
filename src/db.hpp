@@ -21,6 +21,39 @@ namespace db {
   }; // namespace control
 //============================================================================
 //
+  //! \brief List of sources to compile.
+  constexpr auto key_sources() -> const char* { 
+    return "@CPP-INPUT-SOURCES";
+  };
+  //! \brief Software version.
+  constexpr auto key_bit_version() -> const char* { 
+    return "@VERSION"; 
+  }
+  //! \brief C++ compiler executable.
+  constexpr auto key_bit_cpp_compiler() -> const char* { 
+    return "@BIT-CPP-COMPILER"; 
+  }
+  //! \brief C++ compiler flags.
+  constexpr auto key_bit_cpp_flags() -> const char* { 
+    return "@BIT-CPP-FLAGS"; 
+  }
+  //! \brief List of include directories.
+  constexpr auto key_bit_dirs_include() -> const char* { 
+    return "@BIT-DIRS-INCLUDE"; 
+  } 
+  //! \brief List of link directories.
+  constexpr auto key_bit_dirs_link() -> const char* { 
+    return "@BIT-DIRS-LINK"; 
+  }
+  //! \brief Where to find the sources (input).
+  constexpr auto key_project_dirs_input() -> const char* { 
+    return "@PROJECT-DIRS-SOURCE";
+  } 
+  //! \brief Where to put the binaries (output.)
+  constexpr auto key_project_dirs_output() -> const char* { 
+    return "@PROJECT-DIRS-BUILD"; 
+  }
+
   //! \brief String type used by this module.
   using string_t        = types::string_t;
 
@@ -32,9 +65,6 @@ namespace db {
     auto path() { return dir() + "/db"; };
 
   } // namespace config
-
-
- 
 
   //! \brief Use 'record_t' objects to store key/value records in the database.
   using record_t        = std::pair<string_t, string_t>;
