@@ -1,13 +1,35 @@
+/* 
+ * Copyright (C) 2015 by Robert T. Adams
+ * All rights reserved.
+ *
+ * Licensed under the terms of the GNU General Public License, version 2.
+ * See LICENSE.txt for complete license.
+ *
+ */
 #include "db.hpp"
+#include "db_keys.hpp"
 #include <fstream>
 #include <functional>
-
 namespace db {
+//============================================================================
+//
+  auto init_defaults() -> map_t {
+    return {
+      record_t(key_bit_cpp_compiler(), "clang++"),
+      record_t(key_bit_cpp_flags(), "std=c++14"),
+      record_t(key_bit_dirs_link(), ""),
+      record_t(key_bit_dirs_include(), ""),
+      record_t(key_project_dirs_build(), "build"),
+      record_t(key_bit_version(), "0:1")
+    };
+  };
+
 //============================================================================
 //
   auto from_string(const string_t& s) -> record_t {
     return from_string(s.size(), s.c_str());
-  }
+  };
+
 //============================================================================
 //
   auto from_string(size_t len, const char* cstr) -> record_t {
@@ -74,19 +96,18 @@ namespace db {
 
 //============================================================================
 //
-
-auto from_file(const string_t& path) -> map_t {
-  return from_file(path, nullptr);
+auto from_file() -> map_t {
+  return from_file(config::path());
 }
 
-auto from_file(const string_t& path, const map_t* defaults) -> map_t {
+auto from_file(const string_t& path) -> map_t {
   using namespace std;
   ifstream file(path);
 
-  // copy defaults if provided
-  map_t db = defaults ? *defaults : map_t();
+  map_t db;
 
   string linebuf;
+
   while(true) {
     if(!getline(file, linebuf).good()) { break; }
     auto r = db::from_string(linebuf);

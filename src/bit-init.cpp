@@ -1,33 +1,56 @@
 #include "db.hpp"
 #include "option.hpp"
+#include "resource.hpp"
+#include "config.hpp"
 
-#include <stdio.h>
 #include <sys/stat.h>
+#include <iostream>
+#include <boost/filesystem.hpp>
 
-
-int main (void)
-{
-  /* TODO: Figure out how to implement global configuration.
-  // try to create a .bit folder
-  mkdir(".bit", 0775);
-
-  // try to open the file for reading
-  auto db_file = fopen(db_config_path, "r");
-  if(db_file != nullptr) {
-    fclose(db_file);
-    printf("Database already initialized; aborting.\n");
-    return -1;
-  }
-
-  // open the file for read/write
-  db_file = fopen(db::config_path, "w+");
-  if(db_file == nullptr) {
-    printf("Could not create database file, '.bit/db'.  Aborting.\n");
-    return -1;
-  }
-
-  fclose(db_file); 
-  */
+auto do_reset = [](const opt::string_t& s) {
+  using namespace std;
+  cout << "Re-initializing database to defaults." << endl;
+  auto defaults = db::init_defaults();
+  db::to_file(db::config::path(), defaults);
   return 0;
+};
+
+auto do_non_opt = [](const opt::string_t& s) {
+  
+  return 0;
+};
+
+auto do_init = []() {
+  using namespace boost::filesystem;
+  using namespace std;
+
+  auto db_path = db::config::path();
+  auto db_dir  = db::config::dir();
+
+  if(!is_directory(db_dir)) {
+    try { create_directory(db_dir); }
+    catch (...) {
+      cerr << "Could not create \"" << db_dir << "\" directory." << endl;
+      return -1;
+    }
+  }
+  if(exists(db_path)) {
+    cerr << "Database already exists." << endl;
+    return -1;
+  }
+
+  cout << "Initializing database \"" << db_path << "\"" << endl;
+  auto defaults = db::init_defaults();
+  db::to_file(db_path, defaults);
+  return 0;
+};
+
+int main (int argc, char* argv[]) 
+{
+  auto opts = opt::make_list(
+    opt::make('R', "reset", "Clear database entries and re-initialize keys.", 
+      opt::arg_none, do_reset)
+  );
+  return opt::parse(opts, do_non_opt, do_init)(argc, argv);
 }
 

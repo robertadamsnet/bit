@@ -1,19 +1,26 @@
 #include "bit.hpp"
 #include "option.hpp"
-#include <iostream>
+#include "db.hpp"
+#include "db_keys.hpp"
 
+#include <iostream>
+#include <string>
+
+using string_t = std::string;
+
+auto add_file(const string_t& filename) {
+  
+};
 
 int main(int argc, char* argv[]) {
   using namespace opt;
   using namespace std;
-  
-  auto fn = [](const string_t s) { cout << s << endl; return 0; };
+ 
+  auto opts = make_list(); 
 
-  option_list_t opts = {
-    option_t('a', "shit", "shit", arg_required, fn )
-  };
+  auto do_non_opt = [](const opt::string_t&) { return 0; };
+  auto do_default = []() { return 0; };
 
-
-  return parse(opts, fn, argc, argv);
+  return parse(opts, do_non_opt, do_default)(argc, argv);
 }
 
