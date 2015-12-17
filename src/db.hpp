@@ -13,6 +13,7 @@
 
 #include <string>
 #include <map>
+#include <functional>
 
 //! \brief Database functions.
 namespace db {
@@ -85,9 +86,16 @@ namespace db {
 
   //! \brief Process the database from the default path.
   auto from_file() -> map_t;
+
   //! \brief Process an entire text file into a map of key/value pairs.
   auto from_file(
       const string_t& filename    //!< Name of the database file to open.
+    ) -> map_t;                   //!< The map containing the key/value pairs 
+                                  //!< that make up the database
+  //! \brief Process an entire text file into a map of key/value pairs.
+  auto from_file(
+      const string_t& filename,   //!< Name of the database file to open.
+      const map_t* defaults_db    //!< Pointer to existing map with defaults.
     ) -> map_t;                   //!< The map containing the key/value pairs 
                                   //!< that make up the database
   
@@ -96,7 +104,6 @@ namespace db {
 
   //! \brief Initialize a default database map.
   auto init_defaults() -> map_t;
-
 //============================================================================
 }; // namespace db
 #endif//DB_HPP_20151207132454

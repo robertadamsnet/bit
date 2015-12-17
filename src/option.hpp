@@ -8,85 +8,114 @@
  * See LICENSE.txt for complete license.
  *
  */
-#include "types.hpp"
 
+#include <string>
 #include <functional>
-#include <tuple>
-#include <list>
+#include <vector>
 
+namespace option {
+  using std::string;
 
-//! \brief Option processing.
-namespace opt {
-//============================================================================
-//! \brief Option argument availability.
-//!  
-//! These constants are passed via the item_t tuple to specify whether the
-//! option requires an argument.
-enum {
-  arg_none,                           //!< No argument required. 
-  arg_required,                       //!< Argument required.
-  arg_optional                        //!< Argument optional.
-};
+  enum {
+    is_short,
+    is_long,
+    is_value
+  };
 
-using string_t      = types::string_t;//!< Type for strings used in this module.
-using action_t      = std::function<int(const string_t&)>;
-                                      //!< Option "handler" type.
-using default_t     = std::function<int(void)>;
-//! \brief Option record. 
-//!   Tuples of this type describe a single valid option that can be supplied
-//!   via the command line.
-using item_t      = std::tuple<char, const char*, const char*, int, action_t>;
+  using array_t = std::vector<string>;
 
-//! \brief Factory function to create an option record.
-//    Creates an option record.  Using a factory function allows use of auto
-//    for type deduction--in case we want to change the option record type
-//    in the future without having to re-write the world.  I also feel it's
-//    easier to understand compiler errors in the context of a bad function
-//    call, instead of an incorrect type error that is gushing with
-//    templated code.
-auto make(char, const char*, const char*, int, action_t) -> item_t;
+  using option_t            = std::string;
+  using callback_t          = std::function<void(const option_t&)>;
+  using opt_array_t         = std::vector<string>;
+  using array_callback_t    = std::function<void(const opt_array_t&)>;
 
-//! \brief Field accessor constants for the item_t tuple.
-enum {
-  opt_short,                          //!< Short option (char).
-  opt_long,                           //!< Long option (string).
-  opt_help,                           //!< Help text (string).
-  opt_arg,                            //!< Argument mode (enum Arg).
-  opt_action                          //!< Option handler (function).
-};
+  void get_long_opt(const string& opt, const callback_t& callback);
+  void get_short_opts(const string& opt, const callback_t& callback);
+  void parse(int argc, char* argv[], const callback_t& cb);
+  void parse(int argc, char* argv[], const array_callback_t& cb);
 
-using list_t = std::list<item_t>;
-                                      //!< List of options to be passed to
-                                      //!< parse function.
+  auto parse(int argc, char* argv[]) -> opt_array_t;
 
-template<class...Args>
-auto make_list(Args&&...args) {
-  list_t opts = { std::forward<Args>(args)... };
-  return opts;
-};
+  auto is_value_delimiter(char c) -> bool;
+};// namespace option
 
 inline
-auto make(char s, const char* l, const char* h, int has_arg, action_t a)
-  -> item_t
-{
-  return make_tuple(s, l, h, has_arg, a);
+auto option::is_value_delimiter(char c) -> bool {
+  switch(c) {
+  case '=':
+  case ':':
+    return true;
+  default:
+    return false;
+  };
 }
-//! \brief  Parse command line options.
-/*!
-    \return The error code returned from the first handler to terminate with an
-            error.  
-*/
-auto parse(
-    const list_t& opts,             //!< List of options this program can 
-                                    //!< handle.
-    const action_t& non_opt_action, //!< Handler for non-option arguments.
-    const default_t& default_action //!< Handler if no options are given.
-  ) -> std::function<int(int,char*[])>;                         
 
+inline
+void option::get_long_opt(const string& opt, const callback_t& callback) 
+{
+  for(int idx = 0; idx < opt.size(); ++idx) {
+    auto c = opt[idx];
+    if(is_value_delimiter(c)) {
+      string opt_str = std::string(opt, 0, idx);
+      callback(opt_str);
+      string nonopt_str = std::string(opt, idx);
+      callback(nonopt_str);
+      return;
+    }
+  };
+  callback(opt);
+}
 
-//!  \example opt-parse.cpp
+inline
+void option::get_short_opts(const string& opt, const callback_t& callback)
+{
+  auto sz = opt.size();
+  static const string dash("-");
 
-//============================================================================
-}; // namespace opt
+  for(int i = 1; i < sz; ++i) {
+    auto shortopt = dash + opt[i];
+    callback(shortopt);
+  }
+}
+
+inline
+void option::parse(int argc, char* argv[], const callback_t& callback)
+{
+  for(int i = 1; i < argc; ++i) {
+    const std::string opt = argv[i];
+    // if the argument begins with '-', it could be a bunch of short opts
+    // strung together
+    if(opt[0] == '-') {
+      if(opt[1] == '-') {
+        get_long_opt(opt, callback);
+      }
+      else {
+        get_short_opts(opt, callback);
+      }
+    } 
+    else {
+      callback(opt);
+    }
+  }
+}
+
+inline
+void option::parse(int argc, char* argv[], const array_callback_t& callback) 
+{
+  auto opts = parse(argc, argv);
+  callback(opts);
+}
+
+inline
+auto option::parse(int argc, char* argv[]) -> opt_array_t 
+{
+  opt_array_t opts;
+
+  parse(argc, argv, [&] (const std::string& s) {
+      opts.push_back(s);
+    });
+
+  return opts;
+};
 
 #endif//OPTIONS_HPP_2015_1203_225632

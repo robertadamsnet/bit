@@ -100,10 +100,14 @@ auto from_file() -> map_t {
 }
 
 auto from_file(const string_t& path) -> map_t {
+  return from_file(path, nullptr);
+}
+
+auto from_file(const string_t& path, const map_t* defaults_db) -> map_t {
   using namespace std;
   ifstream file(path);
 
-  map_t db;
+  map_t db = defaults_db ? *defaults_db : map_t();
 
   string linebuf;
 
