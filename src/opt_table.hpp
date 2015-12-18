@@ -1,9 +1,10 @@
 #ifndef OPT_TABLE_HPP_20151217082815
 #define OPT_TABLE_HPP_20151217082815 
 
-#include <cstring>
-
 #include "option.hpp"
+#include <cstring>
+#include <list>
+#include <tuple>
 
 namespace opt_table {
 
@@ -48,6 +49,7 @@ namespace opt_table {
       return false;
     };
 
+    // find match in option table or return null
     auto find_match = [&] (const auto& optname) -> const option_t* {
       for(auto& i : table) {
         if(match_name(std::get<opt_names>(i), optname)) {
@@ -66,21 +68,66 @@ namespace opt_table {
       argument
     };
 
-    auto get_opt = [&] (const std::string& optname) {
-      auto error_expected_argument = [&] {
-        std::string msg = "Expected argument for option: " + optname;
-        throw std::runtime_error(msg);
-      };
-      auto error_unrecognized = [&] {
-        std::string msg = "Unrecognized option: " + optname;
-        throw std::runtime_error(msg);
-      };
-
-      auto match = find_match(optname);
-      
+    auto err_unexpected = [] (const auto& optname) {
+      std::string msg = "Unexpected: " + optname;
+      throw std::runtime_error(msg);
     };
 
-    option::parse(argc, argv, get_opt);
+    auto not_found = [&] (const std::string& optname) {
+      if(is_option(optname)) {
+        std::string msg = "Unknown option: " + optname;
+        throw std::runtime_error(msg);
+      }
+      auto found = find_match("");
+      if(found) {
+        auto non_opt_handler = std::get<opt_action>(*found);
+        non_opt_handler(optname);
+      } else {
+        err_unexpected(optname);
+      }
+    };
+
+    auto err_arg_unexpected = [] (const std::string& optname) {
+      std::string msg = "Option \"" + optname + "\" takes no arguments.";
+      throw std::runtime_error(msg);
+    };
+
+    auto err_arg_required = [] (const std::string& optname) {
+      std::string msg = "Argument required for option: " + optname;
+      throw std::runtime_error(msg);
+    };
+
+    auto found = [] (const auto& match, auto optc, const auto& array) {
+    };
+
+    auto get_opts = [&] (const option::array_t& array) {
+      for(int i = 0; i < array.size(); ++i) {
+        auto opt = array[i];
+        auto match = find_match(opt);
+        if(match) {
+          auto action = std::get<opt_action>(*match);
+          auto arg_option = std::get<opt_arg>(*match);
+          auto next_opt = i + 1;
+          std::string optarg = next_opt < array.size() ? array[next_opt] : "";
+          if(is_option(optarg)) {
+            if(arg_option == arg_required) {
+              err_arg_required(opt);
+            } 
+          } 
+          else {
+            if(arg_option == no_arg) {
+              err_arg_unexpected(opt);
+            }
+          }
+          action(optarg);
+        } else {
+          not_found(opt);
+        }
+
+      }
+    };
+
+    option::parse(argc, argv, get_opts);
   }
 
 }; // namespace opt_table

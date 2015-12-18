@@ -1,19 +1,26 @@
 #include "option.hpp"
 #include <iostream>
 
-#include "bit-init.hpp"
+//#include "bit-init.hpp"
 #include "opt_table.hpp"
 
 void get_opts(const std::string& opt) {
   std::cout << opt << "\n";
 };
 
-auto do_add = [](const std::string&) {
+
+auto do_add = [] (const std::string& s) {
+  std::cout << "Haha!\n";
 };
 
 int main(int argc, char* argv[]) try
 {
-    
+  auto opts = opt_table::create(
+      opt_table::option(opt_table::names("-a"), "add", opt_table::arg_required, do_add
+    ));
+
+  opt_table::dispatch(argc, argv, opts);
+
   return 0;
 }
 catch(const std::runtime_error& e) {

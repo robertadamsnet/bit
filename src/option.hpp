@@ -26,15 +26,15 @@ namespace option {
 
   using option_t            = std::string;
   using callback_t          = std::function<void(const option_t&)>;
-  using opt_array_t         = std::vector<string>;
-  using array_callback_t    = std::function<void(const opt_array_t&)>;
+  using array_t         = std::vector<string>;
+  using array_callback_t    = std::function<void(const array_t&)>;
 
   void get_long_opt(const string& opt, const callback_t& callback);
   void get_short_opts(const string& opt, const callback_t& callback);
   void parse(int argc, char* argv[], const callback_t& cb);
   void parse(int argc, char* argv[], const array_callback_t& cb);
 
-  auto parse(int argc, char* argv[]) -> opt_array_t;
+  auto parse(int argc, char* argv[]) -> array_t;
 
   auto is_value_delimiter(char c) -> bool;
 };// namespace option
@@ -107,9 +107,9 @@ void option::parse(int argc, char* argv[], const array_callback_t& callback)
 }
 
 inline
-auto option::parse(int argc, char* argv[]) -> opt_array_t 
+auto option::parse(int argc, char* argv[]) -> array_t 
 {
-  opt_array_t opts;
+  array_t opts;
 
   parse(argc, argv, [&] (const std::string& s) {
       opts.push_back(s);
