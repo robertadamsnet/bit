@@ -18,7 +18,7 @@ namespace opt_table {
   using option_t        = std::tuple<name_list_t, help_text_t, arg_spec_t, 
                             action_t>;
 
-  enum option_fields    { opt_names, opt_help, opt_arg, opt_action };
+  enum option_fields    { opt_names, opt_help, opt_argspec, opt_action };
 
   using option_table_t  = std::vector<option_t>;
 
@@ -101,33 +101,57 @@ namespace opt_table {
     };
 
     auto get_opts = [&] (const option::array_t& array) {
-      for(int i = 0; i < array.size(); ++i) {
-        auto opt = array[i];
-        auto match = find_match(opt);
-        if(match) {
-          auto action = std::get<opt_action>(*match);
-          auto arg_option = std::get<opt_arg>(*match);
-          auto next_opt = i + 1;
-          std::string optarg = next_opt < array.size() ? array[next_opt] : "";
-          if(is_option(optarg)) {
-            if(arg_option == arg_required) {
-              err_arg_required(opt);
-            } 
-          } 
-          else {
-            if(arg_option == no_arg) {
-              err_arg_unexpected(opt);
-            }
-          }
-          action(optarg);
-        } else {
-          not_found(opt);
-        }
+      unsigned idx = 0;
+      const auto array_sz = array.size();
+      auto peek = [&] {
+        return idx < array_sz ? array[idx] : "";
+      };
+      auto get_next = [&] {
+        auto symbol = peek();
+        if(idx < array_sz) ++idx;
+        return symbol;
+      };
 
-      }
+      std::function<void(void)> inner_ = [&] {
+        auto sym = get_next();
+        if(is_option(sym)) {
+        // option handling (short and long)
+          auto match = find_match(sym);
+          if(match) {
+            auto opt = *match;
+            auto argspec = std::get<opt_argspec>(opt);
+            if(argspec == arg_required) {
+              auto optarg = get_next();
+              if(optarg == "" || is_option(optarg)) {
+                err_arg_required(sym);
+              }
+              auto action = std::get<opt_action>(opt);
+              action(optarg);
+            }
+          } 
+        }
+        else {
+          // non option handling
+          auto non_opt_match = find_match("&");
+          if(non_opt_match) {
+            auto non_opt_handler = std::get<opt_action>(*non_opt_match);
+            non_opt_handler(sym);
+          }
+          else {
+            err_unexpected(sym);
+          }
+        }
+        if(idx < array_sz) {
+          inner_();
+        }
+      };
+      
+      inner_();
     };
 
     option::parse(argc, argv, get_opts);
+
+
   }
 
 }; // namespace opt_table
