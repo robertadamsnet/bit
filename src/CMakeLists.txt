@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 2.8.12)
 
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 
-set(bit-common)
 
 link_directories(${Boost_LIBRARY_DIR})
+include_directories(~/options/include)
 
-add_executable(bit        ${bit-common}  bit.cpp bit-init.cpp)
+set(bit-sources 
+  bit.cpp 
+  cmd-init.cpp
+  db.cpp
+)
+
+add_executable(bit        ${bit-sources})
 target_link_libraries(bit ${Boost_LIBRARIES})
 
 #add_executable(bit-test   ${bit-common}  bit-test.cpp)

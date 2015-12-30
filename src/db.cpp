@@ -1,4 +1,4 @@
-/* 
+ /* 
  * Copyright (C) 2015 by Robert T. Adams
  * All rights reserved.
  *
@@ -12,20 +12,7 @@
 namespace db {
 //============================================================================
 //
-  auto init_defaults() -> map_t {
-    return {
-      record_t(key_bit_cpp_compiler(), "clang++"),
-      record_t(key_bit_cpp_flags(), "std=c++14"),
-      record_t(key_bit_dirs_link(), ""),
-      record_t(key_bit_dirs_include(), ""),
-      record_t(key_project_dirs_output(), "build"),
-      record_t(key_bit_version(), "0:1")
-    };
-  };
-
-//============================================================================
-//
-  auto from_string(const string_t& s) -> record_t {
+  auto from_string(const std::string& s) -> record_t {
     return from_string(s.size(), s.c_str());
   };
 
@@ -33,7 +20,7 @@ namespace db {
 //
   auto from_string(size_t len, const char* cstr) -> record_t {
     size_t idx = 0;
-    string_t key;
+    std::string key;
 
     auto getch =[&] {
       return idx < len ? cstr[idx++] : 0;
@@ -60,21 +47,21 @@ namespace db {
 
     auto value_start  = idx < len ? idx     : len;
     
-    return record_t(key, string_t(cstr + value_start));
+    return record_t(key, std::string(cstr + value_start));
   }
 //============================================================================
 //
-  auto to_string(const record_t& record) -> string_t {
+  auto to_string(const record_t& record) -> std::string {
 
-    auto process_key = [] (const string_t& key) {     
-      string_t line;
+    auto process_key = [] (const std::string& key) {     
+      std::string line;
       const auto len = key.size();
       auto idx = len * 0;
       auto getch = [&] {
         return idx < len ? key[idx++] : 0;
       };
 
-      std::function<string_t(void)> recurse = [&] {
+      std::function<std::string(void)> recurse = [&] {
         auto ch = getch();
         switch(ch) {
         case 0:
@@ -95,15 +82,11 @@ namespace db {
 
 //============================================================================
 //
-auto from_file() -> map_t {
-  return from_file(config::path());
-}
-
-auto from_file(const string_t& path) -> map_t {
+auto from_file(const std::string& path) -> map_t {
   return from_file(path, nullptr);
 }
 
-auto from_file(const string_t& path, const map_t* defaults_db) -> map_t {
+auto from_file(const std::string& path, const map_t* defaults_db) -> map_t {
   using namespace std;
   ifstream file(path);
 
@@ -120,7 +103,7 @@ auto from_file(const string_t& path, const map_t* defaults_db) -> map_t {
   return db;
 };
 
-auto to_file(const string_t& path, const map_t& db) -> void {
+auto to_file(const std::string& path, const map_t& db) -> void {
   using namespace std;
   ofstream file(path);
 

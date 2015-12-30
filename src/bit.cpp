@@ -1,26 +1,33 @@
-#include "option.hpp"
+#include "cmd-init.hpp"
+#include <options/options.hpp>
 #include <iostream>
-
-//#include "bit-init.hpp"
-#include "opt_table.hpp"
-#include <boost/lexical_cast.hpp>
 
 void get_opts(const std::string& opt) {
   std::cout << opt << "\n";
 };
 
-auto do_add = [] (const std::string& s) {
-  std::cout << "Haha! " << s << "\n";
-};
 
 int main(int argc, char* argv[]) try
-{
-  auto opts = opt_table::create(
-      opt_table::option(opt_table::names("-a", "--add", "-x"), "add", opt_table::arg_required, do_add
-    ));
+{ 
+  {  
+    using namespace option;
 
-  opt_table::dispatch(argc, argv, opts);
+    auto opts =  
+      table(
+        entry(
+          names("help", "-h", "--help", "&HELP"),
+          "Display help.",
+          arg_none, 
+          do_nothing),
+        entry(
+          names("init"), "Initialize the build database.",
+          arg_none, 
+          [&](const std::string&){}, 
+          init_opt_table())
+      );
 
+    parse(argc, argv, &opts);
+  }
   return 0;
 }
 catch(const std::runtime_error& e) {
