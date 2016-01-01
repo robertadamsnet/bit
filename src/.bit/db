@@ -1,6 +1,9 @@
 &VERSION:0:1
+@CPP_BUILD_PATH:../bit-build
 @CPP_COMPILER:/usr/bin/clang++
-@CPP_INCLUDE_DIRECTORIES:
-@CPP_SOURCES:bit.cpp:cmd-init.cpp:cmd-set.cpp:cmd-unset.cpp:config.cpp:db.cpp
-@LINK_DIRECTORIES:
+@CPP_FLAGS:-std=c++14
+@CPP_INCLUDE_DIRECTORIES:/home/asimov/options/include/
+@CPP_SOURCES:cmd-build.cpp:cmd-init.cpp:cmd-set.cpp:cmd-unset.cpp:db.cpp:bit.cpp
+@LINK_LIBRARIES:boost_filesystem:boost_system
 @LINK_LINKER:/usr/bin/ld
+@TARGET:bit
