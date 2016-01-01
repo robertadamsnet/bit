@@ -1,0 +1,6 @@
+&VERSION:0:1
+@CPP_COMPILER:/usr/bin/clang++
+@CPP_INCLUDE_DIRECTORIES:
+@CPP_SOURCES:bit.cpp:cmd-init.cpp:cmd-set.cpp:cmd-unset.cpp:config.cpp:db.cpp
+@LINK_DIRECTORIES:
+@LINK_LINKER:/usr/bin/ld

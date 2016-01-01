@@ -1,11 +1,10 @@
 #include "cmd-init.hpp"
+#include "cmd-set.hpp"
+#include "cmd-unset.hpp"
+#include "cmd-build.hpp"
+
 #include <options/options.hpp>
 #include <iostream>
-
-void get_opts(const std::string& opt) {
-  std::cout << opt << "\n";
-};
-
 
 int main(int argc, char* argv[]) try
 { 
@@ -22,8 +21,23 @@ int main(int argc, char* argv[]) try
         entry(
           names("init"), "Initialize the build database.",
           arg_none, 
-          [&](const std::string&){}, 
-          init_opt_table())
+          do_nothing, 
+          cmd_init_opt_table()),
+        entry(
+          names("build"), "Build the project.",
+          arg_none, 
+          do_nothing, 
+          cmd_build_opt_table()),
+        entry(
+          names("set"), "Set a build variable.",
+          arg_none, 
+          do_nothing, 
+          cmd_set_opt_table()),
+        entry(
+          names("unset"), "Remove (erase) a build variable.",
+          arg_none, 
+          do_nothing, 
+          cmd_unset_opt_table())
       );
 
     parse(argc, argv, &opts);

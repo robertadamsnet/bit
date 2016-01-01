@@ -9,7 +9,11 @@ include_directories(~/options/include)
 set(bit-sources 
   bit.cpp 
   cmd-init.cpp
+  cmd-build.cpp
+  cmd-set.cpp
+  cmd-unset.cpp
   db.cpp
+  config.cpp
 )
 
 add_executable(bit        ${bit-sources})

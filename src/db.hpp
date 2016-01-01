@@ -50,8 +50,6 @@ namespace db {
   //! \brief Convert a map of records back into a text file.
   auto to_file(const std::string&, const map_t&) -> void;
 
-  //! \brief Initialize a default database map.
-  auto init_defaults() -> map_t;
 //============================================================================
 }; // namespace db
 #endif//DB_HPP_20151207132454
