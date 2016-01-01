@@ -12,7 +12,6 @@ auto cmd_unset_opt_table() -> option::table_t* {
   static std::list<std::string> removals;
 
   auto do_unset = [&] (std::string arg) {
-    arg.insert(0, "@");
     removals.push_back(arg);
   };
 

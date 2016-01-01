@@ -13,7 +13,6 @@ auto cmd_set_opt_table() -> option::table_t* {
 
   auto do_set = [&] (const std::string& arg) {
     auto record = db::from_string(arg);
-    record.first.insert(0, "@");
     assignments.erase(record.first);
     assignments.insert(record);
   };
@@ -22,9 +21,16 @@ auto cmd_set_opt_table() -> option::table_t* {
     config::fn::merge_into_db(assignments);
   };
 
+  auto do_display_set = [&] (const std::string&) {
+    for(const auto& key_value : config::fn::read_db() ) {
+      std::cout << key_value.first << ":" << key_value.second << "\n";
+    }
+  };
+
   static auto opts = table(
     entry(tag_nomatch(), "", arg_required, do_set, nullptr),
-    entry(tag_terminator(), "", arg_none,  do_terminator, nullptr)
+    entry(tag_terminator(), "", arg_none,  do_terminator, nullptr),
+    entry(do_display_set)
   );
 
 
